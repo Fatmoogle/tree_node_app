@@ -1,27 +1,16 @@
 import './App.css';
-import TreeMenu from 'react-simple-tree-menu';
-import '../node_modules/react-simple-tree-menu/dist/main.css';
+import MenuTree from './components/MenuTree.js/MenuTree';
+import '../node_modules/react-simple-tree-menu/dist/main.css';  // CSS for TreeMenu library
+
 
 function App() {
   
-  const treeData = [
-    {
-      key: 'Main node',
-      label: 'Main node',
-      nodes: [
-        {
-          key: 'second-level-node-1',
-          label: 'Node 1 at the second level',
-          nodes: []
-        },
-      ],
-    }
-  ];
   
+
   return (
     <div className="App">
-      <h1>Hello!</h1>
-      <TreeMenu data={treeData} hasSearch={false}></TreeMenu>
+      <h1>Tree Node Generator</h1>
+      <MenuTree />
     </div>
   );
 }
