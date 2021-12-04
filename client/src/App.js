@@ -1,7 +1,7 @@
 import "./App.css";
 import "../node_modules/react-simple-tree-menu/dist/main.css"; // CSS for TreeMenu library
 import { useState, useEffect } from "react";
-import TreeMenu from "react-simple-tree-menu";
+import TreeMenuItem, { TreeMenu, ItemComponent}  from 'react-simple-tree-menu';
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { Form, Button, Row, Col, FormGroup, Container } from "react-bootstrap";
@@ -19,7 +19,6 @@ function App() {
   const [children, setChildren] = useState();
   const [min, setMin] = useState();
   const [max, setMax] = useState();
-  const [childArray, setChildArray] = useState();
   const [factories, setFactories] = useState([
     {
       name: "",
@@ -84,12 +83,17 @@ function App() {
 
   const submitFactory = (e) => {
     e.preventDefault();
+
+    let tempArray = [];
+    for(let i = 0; i < children; i++) {
+      tempArray.push(randomInt(min, max));
+    }
     let temporaryFactory = {
       name: name,
       children: children,
       min: min,
       max: max,
-      childArray: [1,2,3]
+      childArray: tempArray
     };
 
     axios
@@ -99,32 +103,44 @@ function App() {
     
     loadFactories();
   }
+
+  const randomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
   
 
   return (
     <div className="App">
       <h1>Tree Node Generator</h1>
-      <TreeMenu data={treeData} hasSearch={false}></TreeMenu>
+      {/* {factories.map(factory => (
+        <TreeNode data={treeData} ></TreeNode>
+      ))} */}
+      <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} active={false} onClickItem={(e) => console.log(e)}></TreeMenuItem>
+
       <Container >
         <Form className="d-flex justify-content-center"> 
           <Form.Group>
             <Form.Label>Factory Name</Form.Label>
-            <Form.Control type="text" placeholder="Factory Name" onChange={(e) => setName(e.target.value)}></Form.Control>
+            <Form.Control required type="text" placeholder="Factory Name" onChange={(e) => setName(e.target.value)}></Form.Control>
 
             <Form.Label>Nodes</Form.Label>
-            <Form.Control type="text" placeholder="Must be between 1 and 15" onChange={(e) => setChildren(e.target.value)}></Form.Control>
+            <Form.Control required type="number" min="1" max="15" placeholder="Must be between 1 and 15" onChange={(e) => setChildren(e.target.value)}></Form.Control>
 
             <Row className="mb-3">
               <FormGroup as={Col}>
                 <Form.Label>Min Value</Form.Label>
-                <Form.Control type="number" onChange={(e) => setMin(e.target.value)}></Form.Control>
+                <Form.Control required type="number" min="0" onChange={(e) => setMin(e.target.value)}></Form.Control>
               </FormGroup>
               <FormGroup as={Col}>
                 <Form.Label>Max Value</Form.Label>
-                <Form.Control type="number" onChange={(e) => setMax(e.target.value)}></Form.Control>
+                <Form.Control required type="number" min="0" onChange={(e) => setMax(e.target.value)}></Form.Control>
               </FormGroup>
             </Row>
             <Button variant="primary" type="submit" className="mt-4 w-25" onClick={(e) => submitFactory(e)}>Submit</Button>
+
           </Form.Group>
         </Form>
       </Container>

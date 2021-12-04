@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/Fatmoogle/tree_node_app#readme",
   "dependencies": {
+    "@emotion/react": "^11.7.0",
+    "@emotion/styled": "^11.6.0",
+    "@mui/material": "^5.2.2",
     "concurrently": "^6.4.0",
     "express": "^4.17.1",
     "mongoose": "^6.0.14",
