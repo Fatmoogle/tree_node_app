@@ -6,6 +6,8 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { Form, Button, Row, Col, FormGroup, Container } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { NameErr, ChildrenErr, MinErr, MaxErr } from "./components/FormValidation/index";
+
 
 // Create a temporary object to
 // hold all the values to then send
@@ -14,7 +16,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Create conditional render for edit 
 // button when a row is highlighted or active
 
+// FIX FORM VALIDATION BUG, MAX VALUE ERROR IS FINICKY 
+
 function App() {
+
   const [name, setName] = useState("");
   const [children, setChildren] = useState();
   const [min, setMin] = useState();
@@ -99,9 +104,10 @@ function App() {
     axios
       .post("/api/factories", temporaryFactory)
       .then((res) => console.log(res.data))
+      .then(loadFactories())
       .catch((err) => console.log(err));
-    
-    loadFactories();
+      
+      // loadFactories();
   }
 
   const randomInt = (min, max) => {
@@ -110,42 +116,79 @@ function App() {
     return Math.floor(Math.random() * (max - min) + min);
   }
 
+  // name.trim().length < 1
+  // min < 0
+  // max <= min
+  // children < 1 || children > 15
   
+  const disableBtn = () => {
 
+    if(name.length < 1 || max < min || min < 0 || children > 15 || children < 1 ) {
+      console.log("Button is disabled");
+      return true;
+      
+    }
+    console.log("button is enabled")
+
+    return false;
+  }
+
+  console.log("max: " + max);
+  console.log("min: " + min);
+  console.log("type of max: " + typeof max);
+  console.log("type of min: " + typeof min);
   return (
     <div className="App">
       <h1>Tree Node Generator</h1>
-      {/* {factories.map(factory => (
-        <TreeNode data={treeData} ></TreeNode>
-      ))} */}
       <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} active={false} onClickItem={(e) => console.log(e)}></TreeMenuItem>
+      <Container className="d-flex justify-content-center">
+        <Form> 
 
-      <Container >
-        <Form className="d-flex justify-content-center"> 
           <Form.Group>
             <Form.Label>Factory Name</Form.Label>
             <Form.Control required type="text" placeholder="Factory Name" onChange={(e) => setName(e.target.value)}></Form.Control>
-
-            <Form.Label>Nodes</Form.Label>
-            <Form.Control required type="number" min="1" max="15" placeholder="Must be between 1 and 15" onChange={(e) => setChildren(e.target.value)}></Form.Control>
-
-            <Row className="mb-3">
-              <FormGroup as={Col}>
-                <Form.Label>Min Value</Form.Label>
-                <Form.Control required type="number" min="0" onChange={(e) => setMin(e.target.value)}></Form.Control>
-              </FormGroup>
-              <FormGroup as={Col}>
-                <Form.Label>Max Value</Form.Label>
-                <Form.Control required type="number" min="0" onChange={(e) => setMax(e.target.value)}></Form.Control>
-              </FormGroup>
-            </Row>
-            <Button variant="primary" type="submit" className="mt-4 w-25" onClick={(e) => submitFactory(e)}>Submit</Button>
-
+            <NameErr name={name}/>
           </Form.Group>
+
+          <Form.Group>
+            <Form.Label className="mt-3">Nodes</Form.Label>
+            <Form.Control required type="number" min="1" max="15" placeholder="Must be between 1 and 15" onChange={(e) => setChildren(e.target.value)}></Form.Control>
+            <ChildrenErr children={children}/>
+          </Form.Group>
+
+          <Row className="mb-3 mt-3">
+
+            <FormGroup as={Col}>
+              <Form.Label>Min Value</Form.Label>
+              <Form.Control required type="number" min="0" onChange={(e) => setMin(parseInt(e.target.value))}></Form.Control>
+              <MinErr min={min}/>
+            </FormGroup>
+
+            <FormGroup as={Col}>
+              <Form.Label>Max Value</Form.Label>
+              <Form.Control required type="number" min="0" onChange={(e) => setMax(parseInt(e.target.value))}></Form.Control>
+              <MaxErr min={min} max={max} />
+            </FormGroup>
+
+          </Row>
+
+          <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4 w-25"  onClick={(e) => submitFactory(e)}>Submit</Button>
         </Form>
       </Container>
     </div>
   );
+
+  ///// If error in validation, use terfary operator to display either a checkmark with "all good!" componenent, or an error componenet. 
+
+    // Name
+    // if(name.trim().length < 1) {error: please enter a name for your factory.}
+    // Children
+    // if(children.value < 1 || children.value > 15) {error: please pick a number between 1 and 15.}
+    // Min
+    // if(min.value < 0) {error: You cannot pick a number less than 0.}
+    // Max
+    // if(max.value < min.value) {error: your max must be greater than your min.}
+    // else if(max.value > 1000000) {error: relax. You dont need a number bigger than that...}
 }
 
 export default App;
