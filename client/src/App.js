@@ -16,7 +16,10 @@ import { NameErr, ChildrenErr, MinErr, MaxErr } from "./components/FormValidatio
 // Create conditional render for edit 
 // button when a row is highlighted or active
 
-// FIX FORM VALIDATION BUG, MAX VALUE ERROR IS FINICKY 
+// Create Modal for form
+// create regeneration method for facroties that already exist
+// create delete button and functionality for each factory
+
 
 function App() {
 
@@ -24,6 +27,7 @@ function App() {
   const [children, setChildren] = useState();
   const [min, setMin] = useState();
   const [max, setMax] = useState();
+  const [active, setActive] = useState(null);
   const [factories, setFactories] = useState([
     {
       name: "",
@@ -37,11 +41,11 @@ function App() {
   // Gets all factories from db
   const loadFactories = () => {
     axios
-      .get("./api/factories")
-      .then((res) => {
+      .get("/api/factories")
+      .then(res => {
         setFactories(res.data);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   };
@@ -86,7 +90,7 @@ function App() {
     },
   ];
 
-  const submitFactory = (e) => {
+  const submitFactory = async (e) => {
     e.preventDefault();
 
     let tempArray = [];
@@ -101,13 +105,12 @@ function App() {
       childArray: tempArray
     };
 
-    axios
-      .post("/api/factories", temporaryFactory)
-      .then((res) => console.log(res.data))
-      .then(loadFactories())
-      .catch((err) => console.log(err));
-      
-      // loadFactories();
+    try {
+      await axios.post("/api/factories", temporaryFactory);
+      loadFactories();
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   const randomInt = (min, max) => {
@@ -116,31 +119,41 @@ function App() {
     return Math.floor(Math.random() * (max - min) + min);
   }
 
-  // name.trim().length < 1
-  // min < 0
-  // max <= min
-  // children < 1 || children > 15
-  
-  const disableBtn = () => {
+  const setActiveFactory = (e) => {
 
-    if(name.length < 1 || max < min || min < 0 || children > 15 || children < 1 ) {
-      console.log("Button is disabled");
-      return true;
-      
+    // Because "Root" is not in the database, "Root"
+    // will never be an active element because it
+    // does not contain "_id" like other items.
+    
+    for(let i = 0; i < factories.length; i++) {
+      if(e.key.includes(factories[i]._id)) {
+        setActive(e.key);
+      } else if(e.key === "Root") {
+        setActive(null);
+      }
     }
-    console.log("button is enabled")
-
-    return false;
   }
 
-  console.log("max: " + max);
-  console.log("min: " + min);
-  console.log("type of max: " + typeof max);
-  console.log("type of min: " + typeof min);
+  const deleteFactory = async () => {
+    if(active === null) {
+      return;
+    }
+
+    let selectedFactory = factories.find(factory => "Root/" + factory._id  === active);
+
+    try {
+      await axios.delete("/api/factories/" + selectedFactory._id, selectedFactory);
+      loadFactories();
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
     <div className="App">
       <h1>Tree Node Generator</h1>
-      <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} active={false} onClickItem={(e) => console.log(e)}></TreeMenuItem>
+      <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} onClickItem={(e) => setActiveFactory(e)}></TreeMenuItem>
+      <Button variant="danger" type="submit" disabled={active === null} onClick={() => deleteFactory()}>Delete</Button>
       <Container className="d-flex justify-content-center">
         <Form> 
 
@@ -171,6 +184,7 @@ function App() {
             </FormGroup>
 
           </Row>
+          
 
           <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4 w-25"  onClick={(e) => submitFactory(e)}>Submit</Button>
         </Form>

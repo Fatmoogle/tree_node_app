@@ -48,7 +48,7 @@ router.put("/:id", (req, res) => {
 router.delete("/:id", (req, res) => {
     Factory.findById(req.params.id)
         .then(factory => factory.remove().then(() => res.json({ success: true })))
-        .catch(err => res.status(404).json({ success: false }))
+        .catch(res => res.status(404).json({ success: false }))
 });
 
 
