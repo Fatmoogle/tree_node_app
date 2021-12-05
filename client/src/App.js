@@ -141,6 +141,7 @@ function App() {
     try {
       await axios.delete("/api/factories/" + selectedFactory._id, selectedFactory);
       loadFactories();
+      setActiveId(null)
     } catch (err) {
       console.log(err)
     }
