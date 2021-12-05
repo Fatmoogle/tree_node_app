@@ -27,7 +27,7 @@ function App() {
   const [children, setChildren] = useState();
   const [min, setMin] = useState();
   const [max, setMax] = useState();
-  const [active, setActive] = useState(null);
+  const [activeId, setActiveId] = useState(null);
   const [factories, setFactories] = useState([
     {
       name: "",
@@ -120,26 +120,23 @@ function App() {
   }
 
   const setActiveFactory = (e) => {
-
-    // Because "Root" is not in the database, "Root"
-    // will never be an active element because it
-    // does not contain "_id" like other items.
-    
     for(let i = 0; i < factories.length; i++) {
-      if(e.key.includes(factories[i]._id)) {
-        setActive(e.key);
+      if(e.hasNodes === false) {
+        setActiveId(null)
+      } else if(e.key.includes(factories[i]._id)) {
+        setActiveId(e.key);
       } else if(e.key === "Root") {
-        setActive(null);
+        setActiveId(null);
       }
     }
   }
 
   const deleteFactory = async () => {
-    if(active === null) {
+    if(activeId === null) {
       return;
     }
 
-    let selectedFactory = factories.find(factory => "Root/" + factory._id  === active);
+    let selectedFactory = factories.find(factory => "Root/" + factory._id  === activeId);
 
     try {
       await axios.delete("/api/factories/" + selectedFactory._id, selectedFactory);
@@ -153,7 +150,7 @@ function App() {
     <div className="App">
       <h1>Tree Node Generator</h1>
       <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} onClickItem={(e) => setActiveFactory(e)}></TreeMenuItem>
-      <Button variant="danger" type="submit" disabled={active === null} onClick={() => deleteFactory()}>Delete</Button>
+      <Button variant="danger" type="submit" disabled={activeId === null} onClick={() => deleteFactory()}>Delete</Button>
       <Container className="d-flex justify-content-center">
         <Form> 
 
