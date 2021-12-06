@@ -1,24 +1,12 @@
 import "./App.css";
 import "../node_modules/react-simple-tree-menu/dist/main.css"; // CSS for TreeMenu library
 import { useState, useEffect } from "react";
-import TreeMenuItem, { TreeMenu, ItemComponent}  from 'react-simple-tree-menu';
+import TreeMenuItem  from 'react-simple-tree-menu';
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { Form, Button, Row, Col, FormGroup, Container, Modal, ModalTitle, ModalBody, ButtonGroup, ButtonToolbar, ModalHeader } from "react-bootstrap";
+import { Form, Button, Row, Col, FormGroup, Container, Modal, ButtonToolbar } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { NameErr, ChildrenErr, MinErr, MaxErr } from "./components/FormValidation/index";
-
-// Create a temporary object to
-// hold all the values to then send
-// to the db
-
-// Create conditional render for edit 
-// button when a row is highlighted or active
-
-// Create Modal for form
-// create regeneration method for facroties that already exist
-// create delete button and functionality for each factory
-
 
 function App() {
 

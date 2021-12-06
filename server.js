@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 
 // Requiring the factories file
 const factories = require("./routes/api/factories")
@@ -22,6 +23,16 @@ mongoose
 // Use routes
 // Anything going to /api/factories will refer to the factories file
 app.use("/api/factories", factories)
+
+// Serve static assets if app is in production
+if(process.env.NODE_ENV === 'production') {
+    // Set static folder
+    app.use(express.static('client/build'));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    });
+}
 
 // Port
 const port = process.env.PORT || 5000;
