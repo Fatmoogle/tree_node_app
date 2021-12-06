@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import TreeMenuItem, { TreeMenu, ItemComponent}  from 'react-simple-tree-menu';
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { Form, Button, Row, Col, FormGroup, Container } from "react-bootstrap";
+import { Form, Button, Row, Col, FormGroup, Container, Modal, ModalTitle, ModalBody, ButtonGroup, ButtonToolbar, ModalHeader } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { NameErr, ChildrenErr, MinErr, MaxErr } from "./components/FormValidation/index";
-
 
 // Create a temporary object to
 // hold all the values to then send
@@ -28,6 +27,7 @@ function App() {
   const [min, setMin] = useState();
   const [max, setMax] = useState();
   const [activeId, setActiveId] = useState(null);
+  const [show, setShow] = useState(false);
   const [factories, setFactories] = useState([
     {
       name: "",
@@ -55,6 +55,15 @@ function App() {
     loadFactories();
   }, []);
 
+  // Sets name, children, min, and max to default values.
+  const setDefaultValues = () => {
+    setName("");
+    setChildren();
+    setMin();
+    setMax();
+  }
+
+  // Temporary array to hold all the factories and be used for the TreeMenu library.
   let treeDataCopy = [];
 
   // This creates an object for each factory that the TreeMenu library will be able to utilize.
@@ -66,7 +75,7 @@ function App() {
 
     for (let i = 0; i < factory.childArray.length; i++) {
       let secondaryObject = {
-        // A unique key has to be generated for each node. Simply using "i", caused errors.
+        // A unique key has to be generated for each node. 
         key: uuidv4(),
         label: factory.childArray[i],
       };
@@ -90,6 +99,11 @@ function App() {
     },
   ];
 
+  // Function to open and close the modal form
+  const handleShow = () => setShow(true);
+  const handleClose = () => setShow(false);
+
+  // Function to submit a new factory to the DB
   const submitFactory = async (e) => {
     e.preventDefault();
 
@@ -108,6 +122,9 @@ function App() {
     try {
       await axios.post("/api/factories", temporaryFactory);
       loadFactories();
+      setActiveId(null)
+      setDefaultValues();
+      setShow(false);
     } catch (err) {
       console.log(err)
     }
@@ -131,6 +148,7 @@ function App() {
     }
   }
 
+  // Function to delete a selected factory.
   const deleteFactory = async () => {
     if(activeId === null) {
       return;
@@ -147,12 +165,48 @@ function App() {
     }
   }
 
+  const regenerateNumbers = async () => {
+
+    let selectedFactory = factories.find(factory => "Root/" + factory._id  === activeId);
+
+    console.log(selectedFactory);
+    let factoryArrayLength = selectedFactory.children;
+    let tempArray = [];
+
+    for(let i = 0; i < factoryArrayLength; i++) {
+      tempArray.push(randomInt(selectedFactory.min, selectedFactory.max))
+    }
+
+    // console.log(tempArray);
+    console.log("/api/factories/" + selectedFactory._id)
+
+    try {
+      await axios.put("/api/factories/" + selectedFactory._id, {childArray: tempArray} );
+      loadFactories();
+    } catch (err) {
+      console.log(err)
+    }
+    
+  }
+
+  console.log(activeId)
+  console.log(min)
+  console.log(max)
   return (
     <div className="App">
       <h1>Tree Node Generator</h1>
       <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} onClickItem={(e) => setActiveFactory(e)}></TreeMenuItem>
+      <Button variant="primary" onClick={handleShow}>Add Factory</Button>
+      <Button variant="primary" disabled={activeId === null} onClick={handleShow}>Edit Factory</Button>
       <Button variant="danger" type="submit" disabled={activeId === null} onClick={() => deleteFactory()}>Delete</Button>
-      <Container className="d-flex justify-content-center">
+
+
+      <Modal show={show} onHide={handleClose} className="d-flex align-items-center">
+        <Modal.Header closeButton>
+          <Modal.Title>Create a New Factory</Modal.Title>
+        </Modal.Header>
+      <Container className="mt-4">
+        
         <Form> 
 
           <Form.Group>
@@ -183,10 +237,14 @@ function App() {
 
           </Row>
           
-
-          <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4 w-25"  onClick={(e) => submitFactory(e)}>Submit</Button>
+          <ButtonToolbar className="d-flex justify-content-center mb-3 gap-3">
+          <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4"  onClick={(e) => submitFactory(e)}>Submit</Button>
+          <Button onClick={() => regenerateNumbers()} className="mt-4">Regenerate Numbers</Button>
+          </ButtonToolbar>
         </Form>
+        
       </Container>
+      </Modal>
     </div>
   );
 

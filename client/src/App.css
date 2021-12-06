@@ -6,6 +6,11 @@ span {
     margin-left: 5px;
 }
 
+.modal {
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
 /* .container {
     width: 60% !important;
 } */
