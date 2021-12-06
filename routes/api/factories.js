@@ -38,7 +38,7 @@ router.put("/:id", (req, res) => {
         'max': max,
         'childArray': childArray
     }
-    Factory.findOneAndUpdate(req.params.id, updatedFactory, { new: true })
+    Factory.findByIdAndUpdate(req.params.id, updatedFactory, { new: true })
         .then(factory => res.json(factory))
         .catch(err => res.json(err))
 });

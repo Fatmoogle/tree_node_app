@@ -101,16 +101,21 @@ function App() {
 
   // Function to open and close the modal form
   const handleShow = () => setShow(true);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setDefaultValues();
+  }
 
   // Function to submit a new factory to the DB
   const submitFactory = async (e) => {
     e.preventDefault();
 
     let tempArray = [];
+
     for(let i = 0; i < children; i++) {
       tempArray.push(randomInt(min, max));
     }
+
     let temporaryFactory = {
       name: name,
       children: children,
@@ -130,12 +135,14 @@ function App() {
     }
   }
 
+  // Function that generates random integer based on min and max. Includes min value in generation.
   const randomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min);
   }
 
+  // Sets the clicked factory id as active
   const setActiveFactory = (e) => {
     for(let i = 0; i < factories.length; i++) {
       if(e.hasNodes === false) {
@@ -147,9 +154,18 @@ function App() {
       }
     }
   }
+  console.log(min, max, children, name)
+  // Function to edit a factory
+  const editFactory = () => {
+    let selectedFactory = factories.find(factory => "Root/" + factory._id  === activeId);
+    handleShow();
+
+    console.log(selectedFactory)
+  }
 
   // Function to delete a selected factory.
   const deleteFactory = async () => {
+  
     if(activeId === null) {
       return;
     }
@@ -189,16 +205,17 @@ function App() {
     
   }
 
-  console.log(activeId)
-  console.log(min)
-  console.log(max)
   return (
     <div className="App">
       <h1>Tree Node Generator</h1>
       <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} onClickItem={(e) => setActiveFactory(e)}></TreeMenuItem>
-      <Button variant="primary" onClick={handleShow}>Add Factory</Button>
-      <Button variant="primary" disabled={activeId === null} onClick={handleShow}>Edit Factory</Button>
-      <Button variant="danger" type="submit" disabled={activeId === null} onClick={() => deleteFactory()}>Delete</Button>
+      <ButtonToolbar className="d-flex justify-content-center mb-3 gap-3">
+        <Button variant="primary" onClick={handleShow}>Add Factory</Button>
+        <Button variant="primary" disabled={activeId === null} onClick={() => editFactory()}>Edit Factory</Button>
+        <Button variant="danger" type="submit" disabled={activeId === null} onClick={() => deleteFactory()}>Delete</Button>
+        <Button onClick={() => regenerateNumbers()} >Regenerate Numbers</Button>
+      </ButtonToolbar>
+
 
 
       <Modal show={show} onHide={handleClose} className="d-flex align-items-center">
@@ -239,7 +256,6 @@ function App() {
           
           <ButtonToolbar className="d-flex justify-content-center mb-3 gap-3">
           <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4"  onClick={(e) => submitFactory(e)}>Submit</Button>
-          <Button onClick={() => regenerateNumbers()} className="mt-4">Regenerate Numbers</Button>
           </ButtonToolbar>
         </Form>
         
