@@ -1,12 +1,14 @@
 import "./App.css";
 import "../node_modules/react-simple-tree-menu/dist/main.css"; // CSS for TreeMenu library
 import { useState, useEffect } from "react";
-import TreeMenuItem  from 'react-simple-tree-menu';
+import TreeMenuItem  from "react-simple-tree-menu";
+import TreeLogo from "./assets/images/TreeLogo.png"
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { Form, Button, Row, Col, FormGroup, Container, Modal, ButtonToolbar } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { NameErr, ChildrenErr, MinErr, MaxErr } from "./components/FormValidation/index";
+import { display } from "@mui/system";
 
 function App() {
 
@@ -233,9 +235,12 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Tree Node Generator</h1>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <img src={TreeLogo} alt="NodeTreeLogo" width="350" height="350" />
+      </div>
+      <h1 className="display-4" style={{ textAlign: "center", marginBottom: "35px" }}>Tree Node Generator</h1>
       <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} onClickItem={(e) => setActiveFactory(e)}></TreeMenuItem>
-      <ButtonToolbar className="d-flex justify-content-center mb-3 gap-3">
+      <ButtonToolbar className="d-flex justify-content-center mb-3 gap-2">
         <Button variant="primary" onClick={(e) => handleShow(e)} className="addBtn">Add Factory</Button>
         <Button variant="primary" disabled={activeId === null} onClick={handleShow} className="editBtn">Edit Factory</Button>
         <Button disabled={activeId === null} onClick={() => regenerateNumbers()} >Regenerate Numbers</Button>
