@@ -28,6 +28,7 @@ function App() {
   const [max, setMax] = useState();
   const [activeId, setActiveId] = useState(null);
   const [show, setShow] = useState(false);
+  const [modalTitle, setModalTitle] = useState("")
   const [factories, setFactories] = useState([
     {
       name: "",
@@ -61,6 +62,7 @@ function App() {
     setChildren();
     setMin();
     setMax();
+    setModalTitle("");
   }
 
   // Temporary array to hold all the factories and be used for the TreeMenu library.
@@ -99,8 +101,16 @@ function App() {
     },
   ];
 
-  // Function to open and close the modal form
-  const handleShow = () => setShow(true);
+  // Functions to open and close the modal form
+  const handleShow = (e) => {
+    if(e.target.classList.contains("addBtn")) {
+      setModalTitle("Add a New Factory");
+    } else if(e.target.classList.contains("editBtn")) {
+      setModalTitle("Edit Factory")
+    }
+    setShow(true)
+  }
+
   const handleClose = () => {
     setShow(false);
     setDefaultValues();
@@ -154,13 +164,35 @@ function App() {
       }
     }
   }
-  console.log(min, max, children, name)
-  // Function to edit a factory
-  const editFactory = () => {
-    let selectedFactory = factories.find(factory => "Root/" + factory._id  === activeId);
-    handleShow();
 
-    console.log(selectedFactory)
+  // Function to edit a factory
+  const editFactory = async (e) => {
+    e.preventDefault();
+    let selectedFactory = factories.find(factory => "Root/" + factory._id  === activeId);
+    handleShow(e);
+
+    let tempArray = [];
+
+    for(let i = 0; i < children; i++) {
+      tempArray.push(randomInt(min, max));
+    }
+
+    let tempObj = {
+      name: name,
+      children: children,
+      min: min,
+      max: max,
+      childArray: tempArray
+    };
+
+    try {
+      await axios.put("/api/factories/" + selectedFactory._id, tempObj );
+      loadFactories();
+      handleClose();
+    } catch (err) {
+      console.log(err)
+    }
+
   }
 
   // Function to delete a selected factory.
@@ -181,6 +213,7 @@ function App() {
     }
   }
 
+  // Regenerates ONLY the numbers of the factory selected.
   const regenerateNumbers = async () => {
 
     let selectedFactory = factories.find(factory => "Root/" + factory._id  === activeId);
@@ -205,22 +238,27 @@ function App() {
     
   }
 
+  // When fired, a modal opens specifically designed for edits only. 
+  const openEditModal = () => {
+    handleShow()
+  }
+
   return (
     <div className="App">
       <h1>Tree Node Generator</h1>
       <TreeMenuItem data={treeData} hasSearch={false} key={treeData.key} onClickItem={(e) => setActiveFactory(e)}></TreeMenuItem>
       <ButtonToolbar className="d-flex justify-content-center mb-3 gap-3">
-        <Button variant="primary" onClick={handleShow}>Add Factory</Button>
-        <Button variant="primary" disabled={activeId === null} onClick={() => editFactory()}>Edit Factory</Button>
+        <Button variant="primary" onClick={(e) => handleShow(e)} className="addBtn">Add Factory</Button>
+        <Button variant="primary" disabled={activeId === null} onClick={handleShow} className="editBtn">Edit Factory</Button>
+        <Button disabled={activeId === null} onClick={() => regenerateNumbers()} >Regenerate Numbers</Button>
         <Button variant="danger" type="submit" disabled={activeId === null} onClick={() => deleteFactory()}>Delete</Button>
-        <Button onClick={() => regenerateNumbers()} >Regenerate Numbers</Button>
       </ButtonToolbar>
 
 
 
       <Modal show={show} onHide={handleClose} className="d-flex align-items-center">
         <Modal.Header closeButton>
-          <Modal.Title>Create a New Factory</Modal.Title>
+          <Modal.Title>{modalTitle}</Modal.Title>
         </Modal.Header>
       <Container className="mt-4">
         
@@ -255,7 +293,7 @@ function App() {
           </Row>
           
           <ButtonToolbar className="d-flex justify-content-center mb-3 gap-3">
-          <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4"  onClick={(e) => submitFactory(e)}>Submit</Button>
+          <Button variant="primary" type="submit" disabled={name === "" || max < min || min < 0 || children > 15 || children < 1 || max == null || min == null || children == null} className="mt-4"  onClick={modalTitle === "Edit Factory" ? (e) => editFactory(e) : (e) => submitFactory(e)}>Submit</Button>
           </ButtonToolbar>
         </Form>
         
