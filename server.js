@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+require("dotenv").config();
 
 // Requiring the factories file
 const factories = require("./routes/api/factories")
@@ -12,7 +13,7 @@ const app = express();
 app.use(express.json());
 
 // Database
-const db = require("./config/keys").mongoURI;
+const db = process.env.MONGO_URI;
 
 // Connecting to Database
 mongoose
