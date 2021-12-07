@@ -43,7 +43,6 @@ router.put("/:id", (req, res) => {
         .catch(err => res.json(err))
 });
 
-
 // Delete request for deleting a factory
 // Hits the route "/api/factories"
 router.delete("/:id", (req, res) => {
@@ -51,6 +50,5 @@ router.delete("/:id", (req, res) => {
         .then(factory => factory.remove().then(() => res.json({ success: true })))
         .catch(res => res.status(404).json({ success: false }))
 });
-
 
 module.exports = router;
